@@ -10,5 +10,6 @@ require (
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
+	github.com/lib/pq v1.10.9 // indirect
 	gopkg.in/yaml.v2 v2.2.2 // indirect
 )

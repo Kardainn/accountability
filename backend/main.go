@@ -7,6 +7,7 @@ import (
 	"os/signal"
 
 	"github.com/Kardainn/accountability/backend/config"
+	"github.com/Kardainn/accountability/backend/database"
 	"github.com/Kardainn/accountability/backend/server"
 )
 
@@ -27,6 +28,7 @@ func main() {
 		httpChan <- fmt.Errorf("received Interrupt signal")
 	}()
 	server.Start(httpChan)
+	database.ConnectDB(ctx)
 	err = <-httpChan
 	println(err.Error())
 }

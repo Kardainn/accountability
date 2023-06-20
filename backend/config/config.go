@@ -30,6 +30,13 @@ type C struct {
 	HTTPListenAddress string `default:"127.0.0.1:14001"`
 	// HTTP public url
 	HTTPPublicURL string `default:"http://127.0.0.1:14001"`
+
+	// Database
+	DatabaseHost     string `default:"localhost"`
+	DatabasePort     uint16 `default:"5432"`
+	DatabaseUser     string `default:"projectuser"`
+	DatabasePassword string `default:"test"`
+	DatabaseName     string `default:"projectdb"`
 }
 
 // Init initialize config and returns a new context containing config object.
