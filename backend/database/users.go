@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -52,7 +53,7 @@ func CreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	bigid := uuid.New().ID()
 
 	// checking if uuid is already attribuated
-	exists, err := ctxDatabase.CheckUserBigID(bigid)
+	exists, err := CheckUserBigID(ctx, bigid)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -73,13 +74,18 @@ func CreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if userCreation.Username == "" || userCreation.ID == 0 || userCreation.Password == "" {
+	if userCreation.Username == "" || userCreation.Password == "" {
 		w.WriteHeader(http.StatusExpectationFailed)
 		w.Write([]byte("mandatory field not present"))
+		return
 	}
 
-	_, err = ctxDatabase.database.ExecContext(ctx, `INSERT INTO users ("bigId", "username", "id", "name", "surname", "dob", "creation", "isActive", "lastLog", "password") values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-		bigid, userCreation.Username, userCreation.ID, userCreation.Name, userCreation.Surname, userCreation.DOB, time.Now(), true, time.Now(), userCreation.Password)
+	if userCreation.DOB == "" {
+		userCreation.DOB = "01-01-1970"
+	}
+
+	_, err = ctxDatabase.ExecContext(ctx, `INSERT INTO users ("bigId", "username", "id", "name", "surname", "dob", "creation", "isActive", "lastLog", "password") values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`,
+		bigid, strings.ToLower(userCreation.Username), userCreation.ID, userCreation.Name, userCreation.Surname, userCreation.DOB, time.Now(), true, time.Now(), userCreation.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -88,24 +94,35 @@ func CreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("User created succesfully"))
-	return
 }
 
-func (db *Database) CheckUserBigID(bigid uint32) (bool, error) {
+func CheckUserBigID(ctx context.Context, bigid uint32) (bool, error) {
 	var exists bool = true
 
-	err := db.database.QueryRowContext(db.ctx, `SELECT(EXISTS(SELECT * FROM users WHERE "bigId" = $1))`, bigid).Scan(&exists)
+	// connexion to DB
+	ctxDatabase := ConnectDB(ctx)
+	if ctxDatabase == nil {
+		return true, fmt.Errorf("no database connected")
+	}
+
+	err := ctxDatabase.QueryRowContext(ctx, `SELECT(EXISTS(SELECT * FROM users WHERE "bigId" = $1)) as "exists";`, bigid).Scan(&exists)
 	if err != nil {
-		return true, fmt.Errorf("an error has occured while interogating db")
+		return true, err
 	}
 
 	return exists, nil
 }
 
-func (db *Database) CheckUsernameID(username string, id uint16) (bool, error) {
+func CheckUsernameID(ctx context.Context, username string, id uint16) (bool, error) {
 	var exists bool = true
 
-	err := db.database.QueryRowContext(db.ctx, `SELECT(EXISTS(SELECT * FROM users WHERE "username" = $1 AND "id" = $2))`, username, id).Scan(&exists)
+	// connexion to DB
+	ctxDatabase := ConnectDB(ctx)
+	if ctxDatabase == nil {
+		return true, fmt.Errorf("no database connected")
+	}
+
+	err := ctxDatabase.QueryRowContext(ctx, `SELECT(EXISTS(SELECT * FROM users WHERE "username" = $1 AND "id" = $2)) as "exists";`, username, id).Scan(&exists)
 	if err != nil {
 		return true, fmt.Errorf("an error has occured while interogating db")
 	}
