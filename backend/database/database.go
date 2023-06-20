@@ -9,26 +9,36 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func ConnectDB(ctx context.Context) {
+type Database struct {
+	ctx      context.Context
+	database *sql.DB
+}
+
+func ConnectDB(ctx context.Context) *Database {
 	// connection string
 	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.FromContext(ctx).DatabaseHost, config.FromContext(ctx).DatabasePort, config.FromContext(ctx).DatabaseUser, config.FromContext(ctx).DatabasePassword, config.FromContext(ctx).DatabaseName)
 
 	// open database
 	db, err := sql.Open("postgres", psqlconn)
-	CheckError(err)
+	if err != nil {
+		return nil
+	}
 
 	// close database
 	defer db.Close()
 
 	// check db
 	err = db.Ping()
-	CheckError(err)
+	if err != nil {
+		return nil
+	}
 
 	fmt.Println("Connected!")
-}
 
-func CheckError(err error) {
-	if err != nil {
-		panic(err)
+	database := &Database{
+		ctx:      ctx,
+		database: db,
 	}
+
+	return database
 }

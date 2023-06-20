@@ -47,6 +47,7 @@ func Create(ctx context.Context) *Server {
 		})
 	})
 	r.HandleFunc("/", IsUp)
+	r.HandleFunc("/createUser", server.userCreation).Methods("POST", "OPTIONS")
 	// r.HandleFunc("/auth", server.auth).Methods("POST", "OPTIONS")
 	handler := c.Handler(r)
 	httpServer.Handler = handler
@@ -67,5 +68,8 @@ func (s *Server) Start(signalErr chan error) {
 // IsUp is for test purpose
 func IsUp(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
-	w.Write([]byte("the server is up and running"))
+	_, err := w.Write([]byte("the server is up and running"))
+	if err != nil {
+		w.WriteHeader(500)
+	}
 }

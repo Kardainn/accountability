@@ -34,9 +34,9 @@ type C struct {
 	// Database
 	DatabaseHost     string `default:"localhost"`
 	DatabasePort     uint16 `default:"5432"`
-	DatabaseUser     string `default:"projectuser"`
-	DatabasePassword string `default:"test"`
-	DatabaseName     string `default:"projectdb"`
+	DatabaseUser     string `default:"Tom"`
+	DatabasePassword string `default:"TomIsGreat"`
+	DatabaseName     string `default:"Tchoupi"`
 }
 
 // Init initialize config and returns a new context containing config object.
