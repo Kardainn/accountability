@@ -21,6 +21,19 @@ type userCreation struct {
 	Password string `json:"password"`
 }
 
+type userDB struct {
+	Username string    `json:"username"`
+	Id       uint16    `json:"id"`
+	Name     string    `json:"name"`
+	Surname  string    `json:"surname"`
+	LastLog  time.Time `json:"lastLog"`
+	Dob      string    `json:"dob"`
+	Creation string    `json:"creation"`
+	IsActive bool      `json:"isActive"`
+	Password string    `json:"password"`
+	BigId    string    `json:"bigId"`
+}
+
 func CreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	var err error = nil
 
@@ -130,14 +143,44 @@ func CheckUsernameID(ctx context.Context, username string, id uint16) (bool, err
 	return exists, nil
 }
 
-func GetUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func GetUser(ctx context.Context, w http.ResponseWriter, r *http.Request, idResquested uint32) {
+	// connexion to DB
+	ctxDatabase := ConnectDB(ctx)
+	if ctxDatabase == nil {
+		return
+	}
+
+	fmt.Println(idResquested)
+
+	var userDB userDB
+
+	row := ctxDatabase.QueryRowContext(ctx, `SELECT * FROM users WHERE "bigId" = $1`, idResquested)
+	err := row.Scan(&userDB.Username,
+		&userDB.Id,
+		&userDB.Name,
+		&userDB.Surname,
+		&userDB.Dob,
+		&userDB.Creation,
+		&userDB.IsActive,
+		&userDB.LastLog,
+		&userDB.Password,
+		&userDB.BigId)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	fmt.Println(userDB)
+
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(userDB)
+}
+
+func PatchUser(ctx context.Context, w http.ResponseWriter, r *http.Request, id uint32) {
 	// todo implement
 }
 
-func PatchUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	// todo implement
-}
-
-func DeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func DeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request, id uint32) {
 	// todo implement
 }
