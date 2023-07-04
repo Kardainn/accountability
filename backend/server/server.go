@@ -48,6 +48,7 @@ func Create(ctx context.Context) *Server {
 	})
 	r.HandleFunc("/", IsUp)
 	r.HandleFunc("/createUser", server.userCreation).Methods("POST", "OPTIONS")
+	r.HandleFunc("/user/{id}", server.userIdGeneric).Methods("DELETE", "GET", "PATCH", "OPTIONS")
 	// r.HandleFunc("/auth", server.auth).Methods("POST", "OPTIONS")
 	handler := c.Handler(r)
 	httpServer.Handler = handler

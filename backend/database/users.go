@@ -129,3 +129,15 @@ func CheckUsernameID(ctx context.Context, username string, id uint16) (bool, err
 
 	return exists, nil
 }
+
+func GetUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	// todo implement
+}
+
+func PatchUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	// todo implement
+}
+
+func DeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	// todo implement
+}
