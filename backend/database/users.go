@@ -27,8 +27,8 @@ type userDB struct {
 	Name     string    `json:"name"`
 	Surname  string    `json:"surname"`
 	LastLog  time.Time `json:"lastLog"`
-	Dob      string    `json:"dob"`
-	Creation string    `json:"creation"`
+	Dob      time.Time `json:"dob"`
+	Creation time.Time `json:"creation"`
 	IsActive bool      `json:"isActive"`
 	Password string    `json:"password"`
 	BigId    string    `json:"bigId"`
@@ -172,8 +172,8 @@ func GetUser(ctx context.Context, w http.ResponseWriter, r *http.Request, idResq
 
 	fmt.Println(userDB)
 
-	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(userDB)
 }
 
